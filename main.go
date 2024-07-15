@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+    //create and run postgreSql database connection
     var errConnDB error 
     database.Blogdb, errConnDB = database.ConnectDB()
     if errConnDB != nil {
@@ -23,12 +24,24 @@ func main() {
     fmt.Println("PostgreSql connection established")
 
     defer database.Blogdb.Close()
-    
-    http.HandleFunc("/api/user/signup", handlers.UserSignupHandler)
-    http.HandleFunc("/api/user/login", handlers.UserLoginHandler)
-    http.HandleFunc("/api/user/panel", handlers.AuthenticationHandler)
-    http.HandleFunc("/api/user/panel/change-display-name", handlers.ChangeDisplayNameHandler)
-    http.HandleFunc("/api/user/panel/change-email", handlers.ChangeEmailHandler)
-    log.Fatal(http.ListenAndServe(":8080", nil))
+
+    //create and run static server goroutine
+    staticDir := "/home/wb/myproj/sample/test-app/dist"
+    staticHandler := http.FileServer(http.Dir(staticDir))
+    go func() {
+        fmt.Println("static server listening on port: 8000")
+        log.Fatal(http.ListenAndServe(":8000", staticHandler))
+    }()
+
+    //create and run api server
+    mux := http.NewServeMux()
+    mux.HandleFunc("/api/user/signup", handlers.UserSignupHandler)
+    mux.HandleFunc("/api/user/login", handlers.UserLoginHandler)
+    mux.HandleFunc("/api/user/panel", handlers.AuthenticationHandler)
+    mux.HandleFunc("/api/user/panel/change-display-name", handlers.ChangeDisplayNameHandler)
+    mux.HandleFunc("/api/user/panel/change-email", handlers.ChangeEmailHandler)
+
+    fmt.Println("api server listening on port: 8080")
+    log.Fatal(http.ListenAndServe(":8080", mux))
 }
 

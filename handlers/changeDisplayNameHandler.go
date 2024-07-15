@@ -68,24 +68,25 @@ func ChangeDisplayNameHandler(w http.ResponseWriter, r *http.Request) {
                     http.Error(w, err.Error(), http.StatusInternalServerError)
                     return
                 }
-                //create and send back resoponse body
+                //assign new display name to response body
                 resBody.DisplayName = displayName
-                resBodyJson, err := json.Marshal(resBody)
-                if err != nil {
-                    http.Error(w, err.Error(), http.StatusInternalServerError)
-                    return
-                }
-                _, err = io.WriteString(w, string(resBodyJson))
-                if err !=nil {
-                    http.Error(w, err.Error(), http.StatusInternalServerError)
-                    return
-                }
             }else {
                 http.Error(w, "error parsing user id from claims of access token", http.StatusInternalServerError)
                 return
             }
         }else {
             http.Error(w, "error parsing claims from access token", http.StatusInternalServerError)
+            return
+        }
+        //create and send back resoponse body
+        resBodyJson, err := json.Marshal(resBody)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        _, err = io.WriteString(w, string(resBodyJson))
+        if err !=nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
         return
