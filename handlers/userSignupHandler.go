@@ -12,7 +12,6 @@ import (
     "web-back-end/utils"
 )
 
-
 func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
     midware.SetCors(w)
     w.Header().Set("Content-Type", "application/json")
