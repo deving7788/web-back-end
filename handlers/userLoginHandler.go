@@ -3,6 +3,7 @@ package handlers
 import (
     "io"
     "encoding/json"
+    "database/sql"
     "net/http"
     "strings"
     "web-back-end/midware"
@@ -37,26 +38,33 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
-    //get login user's password from database
-    retrievedPassword, err := database.GetPasswordByAccountName(user.AccountName, database.Blogdb)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    //verify password. Return 401 if password is incorrect
-    err = utils.VerifyPassword(&retrievedPassword, &user.Password)
-    if err != nil {
-        http.Error(w, "password does not match", http.StatusUnauthorized)
-        return
-    }
-
-    //get user's role, id, email, displayName,
+    //retrieve login user's id from database
     userId, err := database.GetIdByAccountName(user.AccountName, database.Blogdb) 
     if err != nil {
+        switch {
+        case err == sql.ErrNoRows:
+            http.Error(w, "bad request", http.StatusBadRequest)
+            return
+        default:
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+    }
+    //retrieve password from database
+    retrievedPassword, err := database.GetPasswordById(userId, database.Blogdb)
+    if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
+
+    //verify password. Return 400 if password is incorrect
+    err = utils.VerifyPassword(retrievedPassword, user.Password)
+    if err != nil {
+        http.Error(w, "bad request", http.StatusBadRequest)
+        return
+    }
+
+    //retrieve user's displayName, role, email, emailVerified from database
     displayName, err := database.GetDisplayNameById(userId, database.Blogdb)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -72,6 +80,11 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
+    emailVerified, err := database.GetEmailVerifiedById(userId, database.Blogdb)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
     //create userToken for access and refresh tokens
     var userToken custypes.UserToken
@@ -80,16 +93,17 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
     userToken.DisplayName = displayName
     userToken.Role = role
     userToken.Email = email
+    userToken.EmailVerified = emailVerified
 
     //set access token
-    err = midware.SetAccessCookie(w, &userToken)
+    err = midware.SetAccessCookie(w, userToken)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
     //create and return refresh token
-    refreshToken, err := auth.CreateRefreshToken(&userToken)
+    refreshToken, err := auth.CreateRefreshToken(userToken)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -101,6 +115,7 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
     resBody.Role = role
     resBody.Email = email
     resBody.RefreshToken = refreshToken
+    resBody.EmailVerified = emailVerified
     
     resBodyJson, err := json.Marshal(resBody)
     if err != nil {

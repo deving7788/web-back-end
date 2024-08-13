@@ -5,9 +5,11 @@ import (
     "io"
     "encoding/json"
     "strings"
+    "database/sql"
     "web-back-end/midware"
     "web-back-end/auth"
     "web-back-end/custypes"
+    "web-back-end/database"
     "github.com/golang-jwt/jwt/v5"
 )
 
@@ -23,7 +25,7 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
     var resBody custypes.ResponseBodyUser
     //declare user token
     var userToken custypes.UserToken
-    //get accessToken cookie and parse access Token
+    //get accessToken cookie and parse access token
     accessTokenCookie := auth.GetThisCookie("accessToken", r)
     if len(accessTokenCookie) != 0 {
         //extract access token
@@ -40,7 +42,7 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
             //parse account name
             accountName, err := claims.GetSubject()
             if err != nil {
-                http.Error(w, "error parse accountName from claims of access token", http.StatusInternalServerError)
+                http.Error(w, "error parsing accountName from claims of access token", http.StatusInternalServerError)
                 return
             }else {
                 userToken.AccountName = accountName
@@ -51,42 +53,55 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
             if ok {
                 userToken.UserId = int(userIdFloat)
             }else {
-                http.Error(w, "err parse user id from claims of access token", http.StatusInternalServerError)
+                http.Error(w, "err parsing user id from claims of access token", http.StatusInternalServerError)
                 return
             }
-            //parse display name
-            displayName, ok := claims["displayName"].(string)
-            if ok {
+            //get display name from database
+            displayName, err := database.GetDisplayNameById(userToken.UserId, database.Blogdb)
+            if err == nil {
                 userToken.DisplayName = displayName
                 resBody.DisplayName = displayName
             }else {
-                http.Error(w, "error parse displayName from claims of access token", http.StatusInternalServerError)
+                if err == sql.ErrNoRows {
+                    http.Error(w, err.Error(), http.StatusNotFound)
+                    return
+                }
+                http.Error(w, "error getting display name in access token", http.StatusInternalServerError)
                 return
             }
-            //parse role
-            role, ok := claims["role"].(string)
-            if ok {
+            //get role from database
+            role, err := database.GetRoleById(userToken.UserId, database.Blogdb)
+            if err == nil {
                 userToken.Role = role
                 resBody.Role = role
             }else {
-                http.Error(w, "error parse role from claims of access token", http.StatusInternalServerError)
+                http.Error(w, "error getting role in access token", http.StatusInternalServerError)
                 return
             }
-            //parse email
-            email, ok := claims["email"].(string)
-            if ok {
+            //get email from database
+            email, err := database.GetEmailById(userToken.UserId, database.Blogdb)
+            if err == nil {
                 userToken.Email = email
                 resBody.Email = email
             }else {
-                http.Error(w, "error parsing email from claims of access token", http.StatusInternalServerError)
+                http.Error(w, "error getting email in access token", http.StatusInternalServerError)
+                return
+            }
+            //get emailVerified from database
+            emailVerified, err := database.GetEmailVerifiedById(userToken.UserId, database.Blogdb)
+            if err == nil {
+                userToken.EmailVerified = emailVerified
+                resBody.EmailVerified = emailVerified
+            }else {
+                http.Error(w, "error getting emailVerified in access token", http.StatusInternalServerError)
                 return
             }
         }else {
-            http.Error(w, "error parse claims of access token", http.StatusInternalServerError)
+            http.Error(w, "error parsing claims of access token", http.StatusInternalServerError)
             return
         }
         //write access token into cookie header
-        err = midware.SetAccessCookie(w, &userToken) 
+        err = midware.SetAccessCookie(w, userToken) 
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
@@ -98,7 +113,7 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
             return
         }
         //send response body and return
-        _, err = io.WriteString(w, string(resBodyJson));
+        _, err = io.WriteString(w, string(resBodyJson))
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
@@ -107,14 +122,7 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
     }
 
     //get refresh token
-    headers := r.Header
-    authHeaders := headers["Authorization"]
-    var refreshTokenStr string
-    for _, authHeader := range authHeaders {
-        if strings.Contains(authHeader, "Bearer ") {
-            refreshTokenStr = strings.Split(authHeader, "Bearer ")[1]
-        }
-    }
+    refreshTokenStr := auth.GetRefreshToken(r)
 
     //parse refresh token
     refreshToken, err := auth.ParseToken(refreshTokenStr)
@@ -123,6 +131,9 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
     if err != nil {
         switch {
         case errors.Is(err, jwt.ErrTokenExpired):
+            http.Error(w, err.Error(), http.StatusUnauthorized)
+            return
+        case errors.Is(err, jwt.ErrTokenMalformed):
             http.Error(w, err.Error(), http.StatusUnauthorized)
             return
         default:
@@ -150,45 +161,59 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
             http.Error(w, "error parsing userId claim of refresh token", http.StatusInternalServerError)
             return
         }
-        //parse display name
-        displayName, ok := claims["displayName"].(string) 
-        if ok {
+        //get display name from database
+        displayName, err := database.GetDisplayNameById(userToken.UserId, database.Blogdb)
+        if err == nil {
             userToken.DisplayName = displayName
             resBody.DisplayName = displayName
         }else {
-            http.Error(w, "error parsing displayName claim of refresh token", http.StatusInternalServerError)
+            if err == sql.ErrNoRows {
+                http.Error(w, err.Error(), http.StatusNotFound)
+                return
+            }
+            http.Error(w, "error getting display name in refresh token", http.StatusInternalServerError)
             return
         }
-        //parse role
-        role, ok := claims["role"].(string) 
-        if ok {
+        //get role from database
+        role, err := database.GetRoleById(userToken.UserId, database.Blogdb)
+        if err == nil {
             userToken.Role = role
             resBody.Role = role
         }else {
-            http.Error(w, "error parsing role claim of refresh token", http.StatusInternalServerError)
+            http.Error(w, "error getting role in refresh token", http.StatusInternalServerError)
             return
         }
-        //parse email
-        email, ok := claims["email"].(string) 
-        if ok {
+        //get email from database
+        email, err := database.GetEmailById(userToken.UserId, database.Blogdb)
+        if err == nil {
             userToken.Email = email
             resBody.Email = email
         }else {
-            http.Error(w, "error parsing email claim of refresh token", http.StatusInternalServerError)
+            http.Error(w, "error getting email in refresh token", http.StatusInternalServerError)
+            return
+        }
+        //get emailVerified from database
+        emailVerified, err := database.GetEmailVerifiedById(userToken.UserId, database.Blogdb)
+        if err == nil {
+            userToken.EmailVerified = emailVerified
+            resBody.EmailVerified = emailVerified
+        }else {
+            http.Error(w, "error getting emailVerified in  refresh token", http.StatusInternalServerError)
             return
         }
     }else {
         http.Error(w, "error parsing claims from refresh token", http.StatusInternalServerError)
+        return
     }
 
     //write access token into cookie header
-    err = midware.SetAccessCookie(w, &userToken) 
+    err = midware.SetAccessCookie(w, userToken) 
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
     //create refresh token
-    refreshTokenStr, err = auth.CreateRefreshToken(&userToken)
+    refreshTokenStr, err = auth.CreateRefreshToken(userToken)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return

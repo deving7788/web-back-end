@@ -16,7 +16,7 @@ func CheckAccountNameTaken(accName string, db *sql.DB) (bool, error) {
     case err == sql.ErrNoRows:
       return false, nil
     case err != nil:
-      return false, fmt.Errorf("error checking if account name taken %v\n", err)
+      return true, fmt.Errorf("error checking if account name taken %v\n", err)
     default:
       return true, nil
   }

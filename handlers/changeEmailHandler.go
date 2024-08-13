@@ -3,6 +3,7 @@ package handlers
 import (
     "io"
     "errors"
+    "fmt"
     "encoding/json"
     "net/http"
     "strings"
@@ -68,8 +69,17 @@ func ChangeEmailHandler(w http.ResponseWriter, r *http.Request) {
                     http.Error(w, err.Error(), http.StatusInternalServerError)
                     return
                 }
+                //change email_verified to false
+                emailVerified, err := database.MarkEmailNotVerified(userId, database.Blogdb)
+                if err != nil {
+                    http.Error(w, err.Error(), http.StatusInternalServerError)
+                    fmt.Printf("failed to set email_verified to false, user id: %v\n", userId)
+                    return
+                }
                 //assign new email to response body
                 resBody.Email = email
+                //assign emailVerified to EmailVerifid field in response body
+                resBody.EmailVerified = emailVerified
             }else {
                 http.Error(w, "error parsing user id from claims of access token", http.StatusInternalServerError)
                 return
@@ -93,20 +103,15 @@ func ChangeEmailHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     //get refresh token
-    headers := r.Header
-    authHeaders := headers["Authorization"]
-    var refreshTokenStr string
-    for _, authHeader := range authHeaders {
-        if strings.Contains(authHeader, "Bearer") {
-            refreshTokenStr = strings.Split(authHeader, "Bearer ")[1]
-        }
-    }
-
+    refreshTokenStr := auth.GetRefreshToken(r)
     //parse refresh token
     refreshToken, err := auth.ParseToken(refreshTokenStr)
     if err != nil {
         switch {
         case errors.Is(err, jwt.ErrTokenExpired):
+            http.Error(w, err.Error(), http.StatusUnauthorized)
+            return
+        case errors.Is(err, jwt.ErrTokenMalformed):
             http.Error(w, err.Error(), http.StatusUnauthorized)
             return
         default:
@@ -126,8 +131,16 @@ func ChangeEmailHandler(w http.ResponseWriter, r *http.Request) {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return
             }
+            //change email_verified to false
+            emailVerified, err := database.MarkEmailNotVerified(userId, database.Blogdb)
+            if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                fmt.Printf("failed to set email_verified to false, user id: %v\n", userId)
+                return
+            }
             //create and send back response body
             resBody.Email = email
+            resBody.EmailVerified = emailVerified
             resBodyJson, err := json.Marshal(resBody)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)

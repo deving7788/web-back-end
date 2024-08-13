@@ -5,9 +5,8 @@ import (
     "log"
     "fmt"
     _ "github.com/lib/pq"
-    "web-back-end/handlers"
     "web-back-end/database"
-
+    "web-back-end/handlers"
 )
 
 func main() {
@@ -28,21 +27,29 @@ func main() {
 
     //create and run static server goroutine
     staticDir := "/home/wb/myproj/sample/test-app/dist"
-    staticHandler := http.FileServer(http.Dir(staticDir))
+    FileHandler := http.FileServer(http.Dir(staticDir))
+    muxStatic := http.NewServeMux()
+    muxStatic.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+        FileHandler.ServeHTTP(w, r)
+    })
     go func() {
-        fmt.Println("static server listening on port: 8000")
-        log.Fatal(http.ListenAndServe(":8000", staticHandler))
+        fmt.Println("static server listening on 192.168.50.169:8010")
+        log.Fatal(http.ListenAndServe("192.168.50.169:8010", muxStatic))
     }()
 
     //create and run api server
     mux := http.NewServeMux()
     mux.HandleFunc("/api/user/signup", handlers.UserSignupHandler)
+    mux.HandleFunc("/api/user/email-vrfct", handlers.SendEmailVrfctHandler)
+    mux.HandleFunc("/api/user/email-cfmt", handlers.EmailCfmtHandler)
     mux.HandleFunc("/api/user/login", handlers.UserLoginHandler)
     mux.HandleFunc("/api/user/panel", handlers.AuthenticationHandler)
     mux.HandleFunc("/api/user/panel/change-display-name", handlers.ChangeDisplayNameHandler)
     mux.HandleFunc("/api/user/panel/change-email", handlers.ChangeEmailHandler)
+    mux.HandleFunc("/api/user/panel/change-password", handlers.ChangePasswordHandler)
+    mux.HandleFunc("/api/user/panel/delete-account", handlers.DeleteAccountHandler)
 
-    fmt.Println("api server listening on port: 8080")
-    log.Fatal(http.ListenAndServe(":8080", mux))
+    fmt.Println("api server listening on localhost:8080")
+    log.Fatal(http.ListenAndServe("127.0.0.1:8080", mux))
 }
 

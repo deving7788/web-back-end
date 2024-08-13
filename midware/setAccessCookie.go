@@ -7,7 +7,7 @@ import (
     "web-back-end/custypes"
 )
 
-func SetAccessCookie(w http.ResponseWriter, userToken *custypes.UserToken) (error) {
+func SetAccessCookie(w http.ResponseWriter, userToken custypes.UserToken) (error) {
 
     accessToken, err := auth.CreateAccessToken(userToken)
     if err != nil {

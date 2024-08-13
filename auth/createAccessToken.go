@@ -7,7 +7,7 @@ import (
     "web-back-end/custypes"
 )
 
-func CreateAccessToken(userToken *custypes.UserToken) (string, error) {
+func CreateAccessToken(userToken custypes.UserToken) (string, error) {
     var (
         token *jwt.Token
         tokenStr string
@@ -24,14 +24,15 @@ func CreateAccessToken(userToken *custypes.UserToken) (string, error) {
         jwt.MapClaims {
         "iss": "web-blog",
         "sub": userToken.AccountName,
-        "iat": &numericCreatedDate,
+        "iat": numericCreatedDate,
         "userId": userToken.UserId,
-        "role": userToken.Role,
         "displayName": userToken.DisplayName,
+        "role": userToken.Role,
         "email": userToken.Email,
+        "emailVerified": userToken.EmailVerified,
         })
 
-    tokenStr, err = token.SignedString(*key) 
+    tokenStr, err = token.SignedString(key) 
     if err != nil {
         return "", fmt.Errorf("error signing access jwt token: %v\n", err)
     }

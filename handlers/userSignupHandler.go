@@ -42,13 +42,15 @@ func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
     }
     
     //hash the password
-    hashedPasswordStr, err := utils.HashPassword(&newUser.Password, 5)
+    hashedPasswordStr, err := utils.HashPassword(newUser.Password, 5)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
     }
 
-    //replace password with hashed password
+    //replace password with hashed password, and set EmailVerified
     newUser.Password = hashedPasswordStr
+    newUser.EmailVerified = false
 
     //check if account name exists in db
     accTaken, err := database.CheckAccountNameTaken(newUser.AccountName, database.Blogdb) 
@@ -91,6 +93,7 @@ func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
         _, err = io.WriteString(w, string(resBodyJson))
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError) 
+            return
         }
         return
     }
@@ -109,18 +112,19 @@ func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
     userToken.DisplayName = newUser.DisplayName
     userToken.Role = newUser.Role
     userToken.Email = newUser.Email
+    userToken.EmailVerified = false
 
     //set access token cookie
-    err = midware.SetAccessCookie(w, &userToken)
+    err = midware.SetAccessCookie(w, userToken)
     if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError) 
+        http.Error(w, err.Error(), http.StatusNotImplemented) 
         return
     }
     
     //create and add refresh token to response body
-    refreshTokenStr, err := auth.CreateRefreshToken(&userToken)
+    refreshTokenStr, err := auth.CreateRefreshToken(userToken)
     if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError) 
+        http.Error(w, err.Error(), http.StatusNotImplemented) 
         return
     }
 
@@ -133,17 +137,18 @@ func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
     resBody.Role = newUser.Role
     resBody.Email = newUser.Email
     resBody.RefreshToken = refreshTokenStr
-
+    resBody.EmailVerified = false
+    
     //json response body
     resBodyJson, err := json.Marshal(resBody) 
     if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError) 
+        http.Error(w, err.Error(), http.StatusNotImplemented) 
         return
     }
-    
+
     //return response body
     _, err = io.WriteString(w, string(resBodyJson));
     if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError) 
+        http.Error(w, err.Error(), http.StatusNotImplemented) 
     }
 }

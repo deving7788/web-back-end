@@ -61,15 +61,37 @@ func ChangeDisplayNameHandler(w http.ResponseWriter, r *http.Request) {
         if ok {
             userIdFloat, ok := claims["userId"].(float64)
             if ok {
-                userId := int (userIdFloat)
-                //change displayName in database
-                displayName, err := database.ChangeDisplayNameById(userId, newDisplayName.DisplayName, database.Blogdb)
-                if err != nil {
+                userId := int(userIdFloat)
+                //check if new display name is taken
+                taken, err := database.CheckDisplayNameTaken(newDisplayName.DisplayName, database.Blogdb)
+                if err !=nil {
                     http.Error(w, err.Error(), http.StatusInternalServerError)
                     return
                 }
-                //assign new display name to response body
-                resBody.DisplayName = displayName
+                if taken == true {
+                    resBody.DisplayName = newDisplayName.DisplayName
+                    resBody.DisplayNameProm = "DISPLAY_NAME_IS_TAKEN"
+                }else {
+                    //change displayName in database
+                    displayName, err := database.ChangeDisplayNameById(userId, newDisplayName.DisplayName, database.Blogdb)
+                    if err != nil {
+                        http.Error(w, err.Error(), http.StatusInternalServerError)
+                        return
+                    }
+                    //assign new display name to response body
+                    resBody.DisplayName = displayName
+                    //create and send back resoponse body
+                    resBodyJson, err := json.Marshal(resBody)
+                    if err != nil {
+                        http.Error(w, err.Error(), http.StatusInternalServerError)
+                        return
+                    }
+                    _, err = io.WriteString(w, string(resBodyJson))
+                    if err !=nil {
+                        http.Error(w, err.Error(), http.StatusInternalServerError)
+                        return
+                    }
+                }
             }else {
                 http.Error(w, "error parsing user id from claims of access token", http.StatusInternalServerError)
                 return
@@ -78,34 +100,19 @@ func ChangeDisplayNameHandler(w http.ResponseWriter, r *http.Request) {
             http.Error(w, "error parsing claims from access token", http.StatusInternalServerError)
             return
         }
-        //create and send back resoponse body
-        resBodyJson, err := json.Marshal(resBody)
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-        }
-        _, err = io.WriteString(w, string(resBodyJson))
-        if err !=nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-        }
         return
     }
 
     //get refresh token
-    headers := r.Header
-    authHeaders := headers["Authorization"]
-    var refreshTokenStr string
-    for _, authHeader := range authHeaders {
-        if strings.Contains(authHeader, "Bearer") {
-            refreshTokenStr = strings.Split(authHeader, "Bearer ")[1]
-        }
-    }
+    refreshTokenStr := auth.GetRefreshToken(r)
     //parse refresh token
     refreshToken, err := auth.ParseToken(refreshTokenStr)
     if err != nil {
         switch {
         case errors.Is(err, jwt.ErrTokenExpired):
+            http.Error(w, err.Error(), http.StatusUnauthorized)
+            return
+        case errors.Is(err, jwt.ErrTokenMalformed):
             http.Error(w, err.Error(), http.StatusUnauthorized)
             return
         default:

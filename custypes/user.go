@@ -12,6 +12,7 @@ type User struct {
     Email string `json:"email,omitempty"`
     Password string `json:"password,omitempty"`
     CreatedAt time.Time `json:"createdAt,omitempty"`
+    EmailVerified bool `json:"emailVerified,omitempty"`
 }
 
 type UserLogin struct {
@@ -25,4 +26,5 @@ type UserToken struct {
     DisplayName string `json:"displayName,omitempty"`
     Role string `json:"role,omitempty"`
     Email string `json:"email,omitempty"`
+    EmailVerified bool `json:"emailVerified,omitempty"`
 }
