@@ -48,6 +48,7 @@ func main() {
     mux.HandleFunc("/api/user/panel/change-email", handlers.ChangeEmailHandler)
     mux.HandleFunc("/api/user/panel/change-password", handlers.ChangePasswordHandler)
     mux.HandleFunc("/api/user/panel/delete-account", handlers.DeleteAccountHandler)
+    mux.HandleFunc("/api/blogs", handlers.GetAllArticlesHandler)
 
     fmt.Println("api server listening on localhost:8080")
     log.Fatal(http.ListenAndServe("127.0.0.1:8080", mux))

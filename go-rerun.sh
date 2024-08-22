@@ -1,7 +1,7 @@
 #!/bin/bash
 
 GOPATH="/home/wb/myproj/web-back-end"
-
+#& running background
 run_go_project() {
     go build -o server main.go
     ./server &
@@ -22,6 +22,7 @@ kill_and_exit() {
     exit
 }
 
+#SIGINT means ctrl+c signal
 trap kill_and_exit SIGINT
 
 go build -o server main.go
