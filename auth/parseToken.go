@@ -2,11 +2,12 @@ package auth
 
 import (
     "fmt"
+    "web-back-end/utils"
     "github.com/golang-jwt/jwt/v5"
 )
 
 func ParseToken(tokenStr string) (*jwt.Token, error) {
-    jwtkey, err := ReadJwtKey()
+    jwtkey, err := utils.ReadEnv("JWT_KEY")
     if err != nil {
         return nil, err 
     }

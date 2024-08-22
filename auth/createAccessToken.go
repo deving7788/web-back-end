@@ -5,6 +5,7 @@ import (
     "fmt"
     "time"
     "web-back-end/custypes"
+    "web-back-end/utils"
 )
 
 func CreateAccessToken(userToken custypes.UserToken) (string, error) {
@@ -13,7 +14,7 @@ func CreateAccessToken(userToken custypes.UserToken) (string, error) {
         tokenStr string
     )
     
-    key, err := ReadJwtKey()
+    key, err := utils.ReadEnv("JWT_KEY")
     if err != nil {
         return "", fmt.Errorf("error reading jwtkey in CreateAccessToken %v\n", err)
     }

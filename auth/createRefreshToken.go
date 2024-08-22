@@ -3,6 +3,7 @@ package auth
 import (
     "github.com/golang-jwt/jwt/v5"
     "web-back-end/custypes"
+    "web-back-end/utils"
     "fmt"
     "time"
 )
@@ -11,7 +12,7 @@ func CreateRefreshToken(userToken custypes.UserToken) (string, error) {
     var token *jwt.Token
     var tokenStr string
     
-    key, err := ReadJwtKey()
+    key, err := utils.ReadEnv("JWT_KEY")
     if err != nil {
         return "", fmt.Errorf("error reading jwtkey in CreateRefreshToken %v\n", err)
     }

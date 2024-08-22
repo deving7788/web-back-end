@@ -2,6 +2,7 @@ package utils
 
 import (
     "fmt"
+    "strconv"
     "gopkg.in/gomail.v2"
 )
 
@@ -18,6 +19,27 @@ func SendEmailVrfct(displayName string, email string, vrfctLinkStr string) error
     m.SetHeader("To", fmt.Sprintf("%s", email))
     m.SetHeader("Subject", "greetings")
     m.SetBody("text/html", body)
-    err := d.DialAndSend(m)
+    smtp, err := ReadEnv("EMAIL_SMTP")
+    if err != nil {
+        return err
+    }
+    port, err := ReadEnv("EMAIL_PORT")
+    if err != nil {
+        return err
+    }
+    account, err := ReadEnv("EMAIL_ACCOUNT")
+    if err != nil {
+        return err
+    }
+    password, err := ReadEnv("EMAIL_PASSWORD")
+    if err != nil {
+        return err
+    }
+    portInt, err := strconv.Atoi(port)
+    if err != nil {
+        return fmt.Errorf("error converting port to int type in SendEmailVrfct: %v\n", err)
+    }
+    d := gomail.NewDialer(smtp, portInt, account, password)
+    err = d.DialAndSend(m)
     return err
 }
