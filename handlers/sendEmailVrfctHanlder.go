@@ -23,7 +23,12 @@ func SendEmailVrfctHandler(w http.ResponseWriter, r *http.Request) {
     var displayName, email string = "", ""
     var userId int
     var userIdFloat float64
-    baseStr := "127.0.0.1:8080/api/user/email-cfmt?"
+    apiAddress, err := utils.ReadEnv("API_ADDRESS")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    baseStr := fmt.Sprintf("http://%s/api/user/email-cfmt?", apiAddress)
 
     //get accessToken cookie and parse access token
     accessTokenCookie := auth.GetThisCookie("accessToken", r)
@@ -67,9 +72,8 @@ func SendEmailVrfctHandler(w http.ResponseWriter, r *http.Request) {
             }
             //generate a verification link
             vrfctLinkStr := baseStr + "token=" + string(vrfctTokenBytes) + "&id=" + fmt.Sprintf("%d", vrfctTokenId) 
-            fmt.Println("verification link in access token: ", vrfctLinkStr)
             //send email verification link
-            err = utils.SendEmailVrfct(displayName, email, vrfctLinkStr)
+            err = utils.SendEmailVrfctEmail(displayName, email, vrfctLinkStr)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return
@@ -132,9 +136,8 @@ func SendEmailVrfctHandler(w http.ResponseWriter, r *http.Request) {
         }
         //generate a verification link
         vrfctLinkStr := baseStr + "token=" + string(vrfctTokenBytes) + "&id=" + fmt.Sprintf("%d", vrfctTokenId) 
-        fmt.Println("verification link in refrsh token: ", vrfctLinkStr)
         //send email verification link
-        err = utils.SendEmailVrfct(displayName, email, vrfctLinkStr)
+        err = utils.SendEmailVrfctEmail(displayName, email, vrfctLinkStr)
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return

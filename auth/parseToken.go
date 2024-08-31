@@ -7,7 +7,8 @@ import (
 )
 
 func ParseToken(tokenStr string) (*jwt.Token, error) {
-    jwtkey, err := utils.ReadEnv("JWT_KEY")
+    jwtkeyStr, err := utils.ReadEnv("JWT_KEY")
+    jwtkey := []byte(jwtkeyStr)
     if err != nil {
         return nil, err 
     }

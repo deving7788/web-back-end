@@ -7,6 +7,7 @@ import (
     _ "github.com/lib/pq"
     "web-back-end/database"
     "web-back-end/handlers"
+    "web-back-end/utils"
 )
 
 func main() {
@@ -43,6 +44,7 @@ func main() {
     mux.HandleFunc("/api/user/email-vrfct", handlers.SendEmailVrfctHandler)
     mux.HandleFunc("/api/user/email-cfmt", handlers.EmailCfmtHandler)
     mux.HandleFunc("/api/user/login", handlers.UserLoginHandler)
+    mux.HandleFunc("/api/user/forget-password", handlers.ForgetPasswordHandler)
     mux.HandleFunc("/api/user/panel", handlers.AuthenticationHandler)
     mux.HandleFunc("/api/user/panel/change-display-name", handlers.ChangeDisplayNameHandler)
     mux.HandleFunc("/api/user/panel/change-email", handlers.ChangeEmailHandler)
@@ -51,6 +53,11 @@ func main() {
     mux.HandleFunc("/api/blogs", handlers.GetAllArticlesHandler)
 
     fmt.Println("api server listening on localhost:8080")
-    log.Fatal(http.ListenAndServe("127.0.0.1:8080", mux))
+
+    apiAddress, err := utils.ReadEnv("API_ADDRESS")
+    if err != nil {
+        log.Fatal("error reading api address in main: %v\n", err)
+    }
+    log.Fatal(http.ListenAndServe(apiAddress, mux))
 }
 

@@ -34,7 +34,7 @@ func CreateRefreshToken(userToken custypes.UserToken) (string, error) {
         "emailVerified": userToken.EmailVerified,
         })
 
-    tokenStr, err = token.SignedString(key) 
+    tokenStr, err = token.SignedString([]byte(key)) 
     if err != nil {
         return "", fmt.Errorf("error signing refresh jwt token: %v\n", err)
     }

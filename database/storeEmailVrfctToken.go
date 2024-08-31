@@ -3,7 +3,6 @@ package database
 import (
     "database/sql"
     "time"
-    "fmt"
 )
 
 func StoreEmailVrfctToken(vrfctTokenBytes []byte, userId int, db *sql.DB) (int, error) {
@@ -16,14 +15,12 @@ func StoreEmailVrfctToken(vrfctTokenBytes []byte, userId int, db *sql.DB) (int, 
     if err != nil {
         switch {
         case err == sql.ErrNoRows: 
-            fmt.Println("hello in if")
             dbStr = "INSERT INTO blog.vrfct_tokens (vrfct_token, user_id, expiry_time) VALUES ($1, $2, $3) RETURNING vrfct_token_id"
             err = db.QueryRow(dbStr, string(vrfctTokenBytes), userId, expiry_time).Scan(&tokenId)
         default:
             return -1, err
         }
     }else {
-        fmt.Println("hello in else")
         dbStr = "UPDATE blog.vrfct_tokens SET (vrfct_token, expiry_time) = ($1, $2) WHERE user_id = $3 RETURNING vrfct_token_id"
         err = db.QueryRow(dbStr, string(vrfctTokenBytes), expiry_time, userId).Scan(&tokenId)
     }

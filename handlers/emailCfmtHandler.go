@@ -1,7 +1,8 @@
 package handlers
 
 import (
-    "fmt"
+    "io"
+    "os"
     "strings"
     "net/http"
     "time"
@@ -13,7 +14,7 @@ import (
 
 func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
     midware.SetCors(w)
-    w.Header().Set("Content-Type", "application/json")
+    w.Header().Set("Content-Type", "text/html")
     //handle pre-flight request
     if strings.ToLower(r.Method) == "options" {
         return
@@ -30,42 +31,88 @@ func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "error converting string", http.StatusInternalServerError)
         return
     }
+    //declear response array of bytes
+    var resBytes []byte
     //retrieve verification token and expiry time from database
     vrfctTokenDb, expiryTime, err := database.GetVrfctTokenStrAndTime(tokenId, database.Blogdb)
     if err != nil {
         switch {
         case err == sql.ErrNoRows:
-            fmt.Println("no rows error")
+            resBytes, err = os.ReadFile("handlers/../htmls/emailVrfct404.html")
+            if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+            }
+            _, err = io.WriteString(w, string(resBytes))
+            if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+            }
             return
         default:
-            fmt.Println("some error:", err)
+            http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
     }else {
         if vrfctTokenDb == vrfctToken {
             timeNow := time.Now()
             if timeNow.After(expiryTime) {
-                fmt.Println("The verification token has expired.")
+                resBytes, err = os.ReadFile("handlers/../htmls/emailVrfctTokenExpired.html")
+                if err != nil {
+                    http.Error(w, err.Error(), http.StatusInternalServerError)
+                    return
+                }
+                _, err = io.WriteString(w, string(resBytes))
+                if err != nil {
+                    http.Error(w, err.Error(), http.StatusInternalServerError)
+                    return
+                }
                 return
             }else {
                 err = database.MarkEmailVerified(tokenId, database.Blogdb) 
                 if err != nil {
                     switch {
                     case nil == sql.ErrNoRows:
-                        fmt.Println("no rows error")
+                        resBytes, err = os.ReadFile("handlers/../htmls/emailVrfct404.html")
+                        if err != nil {
+                            http.Error(w, err.Error(), http.StatusInternalServerError)
+                            return
+                        }
+                        _, err = io.WriteString(w, string(resBytes))
+                        if err != nil {
+                            http.Error(w, err.Error(), http.StatusInternalServerError)
+                            return
+                        }
                         return
                     default:
-                        fmt.Println("some error:", err)
+                        http.Error(w, err.Error(), http.StatusInternalServerError)
                         return
                     }
                 }else {
-                    fmt.Println("This email has been verified")
+                    resBytes, err = os.ReadFile("handlers/../htmls/emailVerified.html")
+                    if err != nil {
+                        http.Error(w, err.Error(), http.StatusInternalServerError)
+                        return
+                    }
+                    _, err = io.WriteString(w, string(resBytes))
+                    if err != nil {
+                        http.Error(w, err.Error(), http.StatusInternalServerError)
+                        return
+                    }
                     return
                 }
             }
-            fmt.Println("they are equal")
         }else {
-            fmt.Println("verification tokens are different.")
+            resBytes, err = os.ReadFile("handlers/../htmls/emailVrfctRequestInvalid.html")  
+            if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+            }
+            _, err := io.WriteString(w, string(resBytes))
+            if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+            }
             return
         }
     }
