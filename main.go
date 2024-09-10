@@ -27,16 +27,16 @@ func main() {
     defer database.Blogdb.Close()
 
     //create and run static server goroutine
-    staticDir := "/home/wb/myproj/sample/test-app/dist"
-    FileHandler := http.FileServer(http.Dir(staticDir))
-    muxStatic := http.NewServeMux()
-    muxStatic.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
-        FileHandler.ServeHTTP(w, r)
-    })
-    go func() {
-        fmt.Println("static server listening on 192.168.50.169:8010")
-        log.Fatal(http.ListenAndServe("192.168.50.169:8010", muxStatic))
-    }()
+    //staticDir := "/home/wb/myproj/sample/test-app/dist"
+    //FileHandler := http.FileServer(http.Dir(staticDir))
+    //muxStatic := http.NewServeMux()
+    //muxStatic.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+    //    FileHandler.ServeHTTP(w, r)
+    //})
+    //go func() {
+    //    fmt.Println("static server listening on 192.168.50.169:8010")
+    //    log.Fatal(http.ListenAndServe("192.168.50.169:8010", muxStatic))
+    //}()
 
     //create and run api server
     mux := http.NewServeMux()
@@ -45,6 +45,8 @@ func main() {
     mux.HandleFunc("/api/user/email-cfmt", handlers.EmailCfmtHandler)
     mux.HandleFunc("/api/user/login", handlers.UserLoginHandler)
     mux.HandleFunc("/api/user/forget-password", handlers.ForgetPasswordHandler)
+    mux.HandleFunc("/api/user/pr-page", handlers.SendPasswordResetPageHandler)
+    mux.HandleFunc("/api/user/handle-pr", handlers.ResetPasswordHandler)
     mux.HandleFunc("/api/user/panel", handlers.AuthenticationHandler)
     mux.HandleFunc("/api/user/panel/change-display-name", handlers.ChangeDisplayNameHandler)
     mux.HandleFunc("/api/user/panel/change-email", handlers.ChangeEmailHandler)

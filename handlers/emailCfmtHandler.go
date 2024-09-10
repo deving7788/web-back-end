@@ -20,7 +20,7 @@ func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     //get id and verification token from request url
-    url := *r.URL
+    url := r.URL
     rawQuery := url.RawQuery
     qStrs := strings.Split(rawQuery, "&")
 
@@ -31,7 +31,7 @@ func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "error converting string", http.StatusInternalServerError)
         return
     }
-    //declear response array of bytes
+    //declear response of type []byte
     var resBytes []byte
     //retrieve verification token and expiry time from database
     vrfctTokenDb, expiryTime, err := database.GetVrfctTokenStrAndTime(tokenId, database.Blogdb)

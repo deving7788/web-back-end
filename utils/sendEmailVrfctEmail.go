@@ -18,11 +18,19 @@ func SendEmailVrfctEmail(displayName string, email string, vrfctLinkStr string) 
                           </div>
                           <br/>
                           <br/>
-                          <div style="font-size: 16px; color: #114211;">from quarque.com</div>`, displayName, vrfctLinkStr)
+                          <div style="font-size: 16px; color: #114211;">from quarque.com</div>
+                          <br/>
+                          <br/>
+                          <br/>
+                          <br/>
+                          <br/>
+                          <br/>
+                          <div style="font-size: 14px; color: #114211;">If you did not request this email, please ignore it.</div>
+                          `, displayName, vrfctLinkStr)
     m := gomail.NewMessage()
     m.SetHeader("From", "quarque@quarque.com")
     m.SetHeader("To", fmt.Sprintf("%s", email))
-    m.SetHeader("Subject", "greetings")
+    m.SetHeader("Subject", "email verification")
     m.SetBody("text/html", body)
     smtp, err := ReadEnv("EMAIL_SMTP")
     if err != nil {
@@ -42,7 +50,7 @@ func SendEmailVrfctEmail(displayName string, email string, vrfctLinkStr string) 
     }
     portInt, err := strconv.Atoi(port)
     if err != nil {
-        return fmt.Errorf("error converting port to int type in SendEmailVrfct: %v\n", err)
+        return fmt.Errorf("error converting port to int type: %v\n", err)
     }
     d := gomail.NewDialer(smtp, portInt, account, password)
     err = d.DialAndSend(m)

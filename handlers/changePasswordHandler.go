@@ -6,6 +6,7 @@ import (
     "encoding/json"
     "net/http"
     "strings"
+    "strconv"
     "web-back-end/midware"
     "web-back-end/database"
     "web-back-end/auth"
@@ -71,7 +72,17 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
                     return
                 }
                 //hash password
-                hashedPasswordStr, err := utils.HashPassword(passwords.NewPassword, 5)
+                costStr, err := utils.ReadEnv("COST")
+                if err != nil {
+                    http.Error(w, err.Error(), http.StatusInternalServerError)
+                    return
+                }
+                cost, err := strconv.Atoi(costStr)
+                if err != nil {
+                    http.Error(w, err.Error(), http.StatusInternalServerError)
+                    return
+                }
+                hashedPasswordStr, err := utils.HashPassword(passwords.NewPassword, cost)
                 if err != nil {
                     http.Error(w, err.Error(), http.StatusInternalServerError)
                     return
@@ -128,7 +139,17 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
                 return
             }
             //hash password
-            hashedPasswordStr, err := utils.HashPassword(passwords.NewPassword, 5)
+            costStr, err := utils.ReadEnv("COST")
+            if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+            }
+            cost, err := strconv.Atoi(costStr)
+            if err != nil {
+                http.Error(w, err.Error(), http.StatusInternalServerError)
+                return
+            }
+            hashedPasswordStr, err := utils.HashPassword(passwords.NewPassword, cost)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return

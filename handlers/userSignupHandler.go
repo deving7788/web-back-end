@@ -4,6 +4,7 @@ import (
     "net/http"
     "strings"
     "io"
+    "strconv"
     "encoding/json"
     "web-back-end/database"
     "web-back-end/custypes"
@@ -42,7 +43,17 @@ func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
     }
     
     //hash the password
-    hashedPasswordStr, err := utils.HashPassword(newUser.Password, 5)
+    costStr, err := utils.ReadEnv("COST")
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    cost, err := strconv.Atoi(costStr)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    hashedPasswordStr, err := utils.HashPassword(newUser.Password, cost)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return

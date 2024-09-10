@@ -72,7 +72,7 @@ func SendEmailVrfctHandler(w http.ResponseWriter, r *http.Request) {
             }
             //generate a verification link
             vrfctLinkStr := baseStr + "token=" + string(vrfctTokenBytes) + "&id=" + fmt.Sprintf("%d", vrfctTokenId) 
-            //send email verification link
+            //send email verification email
             err = utils.SendEmailVrfctEmail(displayName, email, vrfctLinkStr)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
