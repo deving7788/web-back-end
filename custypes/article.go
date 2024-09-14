@@ -12,4 +12,5 @@ type Article struct {
     CreatedAt time.Time `json:"createdAt,omitempty"`
     ModifiedAt time.Time `json:"modifiedAt,omitempty"`
     Featured bool `json:"featured"`
+    Category string `json:"category,omitempty"`
 }

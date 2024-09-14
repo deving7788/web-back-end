@@ -5,8 +5,8 @@ import (
     "web-back-end/custypes"
 )
 
-func GetAllArticles(articles *[]custypes.Article, db *sql.DB) (error) {
-    queryStr := "SELECT * FROM blog.articles"
+func GetArticleTitles(articles *[]custypes.Article, db *sql.DB) (error) {
+    queryStr := "SELECT article_id, title, created_at, modified_at, featured FROM blog.articles"
     rows, err := db.Query(queryStr)
     if err != nil {
         return err
@@ -14,7 +14,7 @@ func GetAllArticles(articles *[]custypes.Article, db *sql.DB) (error) {
 
     for rows.Next() {
         var article custypes.Article
-        err = rows.Scan(&article.ArticleId, &article.Author, &article.Title, &article.Content, &article.CreatedAt, &article.ModifiedAt, &article.Featured)
+        err = rows.Scan(&article.ArticleId, &article.Title, &article.CreatedAt, &article.ModifiedAt, &article.Featured)
         if err != nil {
             return err
         }

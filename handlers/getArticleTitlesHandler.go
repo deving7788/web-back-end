@@ -11,7 +11,7 @@ import (
     "web-back-end/database"
 )
 
-func GetAllArticlesHandler(w http.ResponseWriter, r *http.Request) {
+func GetArticleTitlesHandler(w http.ResponseWriter, r *http.Request) {
     midware.SetCors(w)
     w.Header().Set("Content-Type", "application/json")
 
@@ -20,14 +20,16 @@ func GetAllArticlesHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    //get all articles from database
+    //get article titles from database
     var articles []custypes.Article
-    err := database.GetAllArticles(&articles, database.Blogdb)    
+    err := database.GetArticleTitles(&articles, database.Blogdb)    
     if err != nil {
-        fmt.Println("error get articles: %v\n", err)
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
+    fmt.Printf("CreatedAt in GetArticleTitlesHandler: %v\n", articles[0].CreatedAt)
+    fmt.Printf("CreatedAt in GetArticleTitlesHandler: %v\n", articles[1].CreatedAt)
+    fmt.Printf("CreatedAt in GetArticleTitlesHandler: %v\n", articles[2].CreatedAt)
     
     //form and send json response
     resJsonBytes, err := json.Marshal(articles)
