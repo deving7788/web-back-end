@@ -3,7 +3,6 @@ package handlers
 import (
     "net/http"
     "io"
-    "fmt"
     "strings"
     "encoding/json"
     "web-back-end/midware"
@@ -27,9 +26,6 @@ func GetArticleTitlesHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
-    fmt.Printf("CreatedAt in GetArticleTitlesHandler: %v\n", articles[0].CreatedAt)
-    fmt.Printf("CreatedAt in GetArticleTitlesHandler: %v\n", articles[1].CreatedAt)
-    fmt.Printf("CreatedAt in GetArticleTitlesHandler: %v\n", articles[2].CreatedAt)
     
     //form and send json response
     resJsonBytes, err := json.Marshal(articles)

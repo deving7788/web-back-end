@@ -52,7 +52,9 @@ func main() {
     mux.HandleFunc("/api/user/panel/change-email", handlers.ChangeEmailHandler)
     mux.HandleFunc("/api/user/panel/change-password", handlers.ChangePasswordHandler)
     mux.HandleFunc("/api/user/panel/delete-account", handlers.DeleteAccountHandler)
+    mux.HandleFunc("/api/blog/featured-articles", handlers.GetFeaturedArticlesHandler)
     mux.HandleFunc("/api/blog/article-titles", handlers.GetArticleTitlesHandler)
+    mux.HandleFunc("/api/blog/article", handlers.GetArticleHandler)
 
     fmt.Println("api server listening on localhost:8080")
 
