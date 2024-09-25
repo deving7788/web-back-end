@@ -3,6 +3,7 @@ package main
 import (
     "net/http"
     "log"
+    "os"
     "fmt"
     _ "github.com/lib/pq"
     "web-back-end/database"
@@ -31,11 +32,11 @@ func main() {
     //FileHandler := http.FileServer(http.Dir(staticDir))
     //muxStatic := http.NewServeMux()
     //muxStatic.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
-    //    FileHandler.ServeHTTP(w, r)
+        //FileHandler.ServeHTTP(w, r)
     //})
     //go func() {
-    //    fmt.Println("static server listening on 192.168.50.169:8010")
-    //    log.Fatal(http.ListenAndServe("192.168.50.169:8010", muxStatic))
+        //fmt.Println("static server listening on :8010")
+        //log.Fatal(http.ListenAndServe(":8010", muxStatic))
     //}()
 
     //create and run api server
@@ -56,12 +57,16 @@ func main() {
     mux.HandleFunc("/api/blog/article-titles", handlers.GetArticleTitlesHandler)
     mux.HandleFunc("/api/blog/article", handlers.GetArticleHandler)
 
-    fmt.Println("api server listening on localhost:8080")
+    goServerPort, err := utils.ReadEnv("GO_SERVER_PORT")
+    goServerPort1 := os.Getenv("GO_SERVER_PORT")
+    fmt.Printf("port is %v\n", goServerPort)
+    fmt.Printf("port1 is %v\n", goServerPort1)
+    fmt.Println("go server listening on: ", goServerPort1)
 
-    apiAddress, err := utils.ReadEnv("API_ADDRESS")
     if err != nil {
         log.Fatal("error reading api address in main: %v\n", err)
     }
-    log.Fatal(http.ListenAndServe(apiAddress, mux))
+    log.Fatal(http.ListenAndServe(goServerPort1, mux))
+    //log.Fatal(http.ListenAndServeTLS(goServerPort, "tls/fullchain.pem", "tls/privkey.pem", mux))
 }
 

@@ -19,7 +19,7 @@ func CreateRefreshToken(userToken custypes.UserToken) (string, error) {
     
     createdDate := time.Now()
     numericCreatedDate := jwt.NewNumericDate(createdDate)
-    expiryDate := time.Now().Add(time.Hour * 24)
+    expiryDate := time.Now().Add(time.Hour * 2)
     numericExpiryDate := jwt.NewNumericDate(expiryDate)
     token = jwt.NewWithClaims(jwt.SigningMethodHS256,
         jwt.MapClaims {
