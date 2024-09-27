@@ -4,8 +4,8 @@ import (
     "github.com/golang-jwt/jwt/v5"
     "fmt"
     "time"
+    "os"
     "web-back-end/custypes"
-    "web-back-end/utils"
 )
 
 func CreateAccessToken(userToken custypes.UserToken) (string, error) {
@@ -14,10 +14,7 @@ func CreateAccessToken(userToken custypes.UserToken) (string, error) {
         tokenStr string
     )
     
-    key, err := utils.ReadEnv("JWT_KEY")
-    if err != nil {
-        return "", fmt.Errorf("error reading jwtkey in CreateAccessToken %v\n", err)
-    }
+    key := os.Getenv("JWT_KEY")
 
     createdDate := time.Now()
     numericCreatedDate := jwt.NewNumericDate(createdDate)
@@ -33,7 +30,7 @@ func CreateAccessToken(userToken custypes.UserToken) (string, error) {
         "emailVerified": userToken.EmailVerified,
         })
 
-    tokenStr, err = token.SignedString([]byte(key)) 
+    tokenStr, err := token.SignedString([]byte(key)) 
     if err != nil {
         return "", fmt.Errorf("error signing access jwt token: %v\n", err)
     }

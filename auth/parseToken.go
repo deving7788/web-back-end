@@ -2,16 +2,13 @@ package auth
 
 import (
     "fmt"
-    "web-back-end/utils"
+    "os"
     "github.com/golang-jwt/jwt/v5"
 )
 
 func ParseToken(tokenStr string) (*jwt.Token, error) {
-    jwtkeyStr, err := utils.ReadEnv("JWT_KEY")
+    jwtkeyStr := os.Getenv("JWT_KEY")
     jwtkey := []byte(jwtkeyStr)
-    if err != nil {
-        return nil, err 
-    }
 
     token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
         if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

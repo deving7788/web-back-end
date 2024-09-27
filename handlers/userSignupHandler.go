@@ -3,6 +3,7 @@ package handlers
 import (
     "net/http"
     "strings"
+    "os"
     "io"
     "strconv"
     "encoding/json"
@@ -43,11 +44,7 @@ func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
     }
     
     //hash the password
-    costStr, err := utils.ReadEnv("COST")
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+    costStr := os.Getenv("COST")
     cost, err := strconv.Atoi(costStr)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -7,6 +7,7 @@ import (
     "net/http"
     "strings"
     "strconv"
+    "os"
     "web-back-end/midware"
     "web-back-end/database"
     "web-back-end/auth"
@@ -72,11 +73,7 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
                     return
                 }
                 //hash password
-                costStr, err := utils.ReadEnv("COST")
-                if err != nil {
-                    http.Error(w, err.Error(), http.StatusInternalServerError)
-                    return
-                }
+                costStr := os.Getenv("COST")
                 cost, err := strconv.Atoi(costStr)
                 if err != nil {
                     http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -139,11 +136,7 @@ func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
                 return
             }
             //hash password
-            costStr, err := utils.ReadEnv("COST")
-            if err != nil {
-                http.Error(w, err.Error(), http.StatusInternalServerError)
-                return
-            }
+            costStr := os.Getenv("COST")
             cost, err := strconv.Atoi(costStr)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)

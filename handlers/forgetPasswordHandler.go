@@ -3,6 +3,7 @@ package handlers
 import (
     "fmt"
     "net/http"
+    "os"
     "strings"
     "web-back-end/midware"
     "web-back-end/database"
@@ -31,11 +32,7 @@ func ForgetPasswordHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     //generate a password reset link
-    apiAddress, err := utils.ReadEnv("API_ADDRESS")
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+    apiAddress := os.Getenv("API_ADDRESS")
     baseStr := fmt.Sprintf("http://%s/api/user/pr-page?", apiAddress)
 
     prLinkStr := baseStr + "token=" + string(prTokenBytes) + "&id=" + fmt.Sprintf("%d", prTokenId )

@@ -2,6 +2,7 @@ package utils
 
 import (
     "fmt"
+    "os"
     "strconv"
     "gopkg.in/gomail.v2"
 )
@@ -32,22 +33,10 @@ func SendEmailVrfctEmail(displayName string, email string, vrfctLinkStr string) 
     m.SetHeader("To", fmt.Sprintf("%s", email))
     m.SetHeader("Subject", "email verification")
     m.SetBody("text/html", body)
-    smtp, err := ReadEnv("EMAIL_SMTP")
-    if err != nil {
-        return err
-    }
-    port, err := ReadEnv("EMAIL_PORT")
-    if err != nil {
-        return err
-    }
-    account, err := ReadEnv("EMAIL_ACCOUNT")
-    if err != nil {
-        return err
-    }
-    password, err := ReadEnv("EMAIL_PASSWORD")
-    if err != nil {
-        return err
-    }
+    smtp := os.Getenv("EMAIL_SMTP")
+    port := os.Getenv("EMAIL_PORT")
+    account := os.Getenv("EMAIL_ACCOUNT")
+    password := os.Getenv("EMAIL_PASSWORD")
     portInt, err := strconv.Atoi(port)
     if err != nil {
         return fmt.Errorf("error converting port to int type: %v\n", err)
