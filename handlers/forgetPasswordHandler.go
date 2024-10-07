@@ -32,8 +32,8 @@ func ForgetPasswordHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     //generate a password reset link
-    apiAddress := os.Getenv("API_ADDRESS")
-    baseStr := fmt.Sprintf("http://%s/api/user/pr-page?", apiAddress)
+    apiAddress := os.Getenv("API_HOST")
+    baseStr := fmt.Sprintf("%s/api/user/pr-page?", apiAddress)
 
     prLinkStr := baseStr + "token=" + string(prTokenBytes) + "&id=" + fmt.Sprintf("%d", prTokenId )
     //send password reset email

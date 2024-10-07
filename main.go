@@ -3,7 +3,6 @@ package main
 import (
     "net/http"
     "log"
-    "path/filepath"
     "os"
     "fmt"
     _ "github.com/lib/pq"
@@ -26,28 +25,6 @@ func main() {
     fmt.Println("PostgreSql connection established")
 
     defer database.Blogdb.Close()
-
-    //create and run static server goroutine
-    staticDir := "/home/go-backend/react-frontend/dist"
-    FileHandler := http.FileServer(http.Dir(staticDir))
-    muxStatic := http.NewServeMux()
-    muxStatic.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
-        filePath := filepath.Join(staticDir, r.URL.Path)
-        fileInfo, err := os.Stat(filePath) 
-        if err != nil {
-            http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
-        }else {
-            if fileInfo.IsDir() {
-                http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))  
-            }else {
-                FileHandler.ServeHTTP(w, r)
-            }
-        }
-    })
-    go func() {
-        fmt.Println("go static server listening on :8010")
-        log.Fatal(http.ListenAndServe(":8011", muxStatic))
-    }()
 
     //create and run api server
     mux := http.NewServeMux()

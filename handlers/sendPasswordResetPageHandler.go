@@ -34,7 +34,7 @@ func SendPasswordResetPageHandler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         switch {
         case err == sql.ErrNoRows:
-            resBytes, err = os.ReadFile("handlers/../htmls/passwordReset404.html")
+            resBytes, err = os.ReadFile("htmls/passwordReset404.html")
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return
@@ -53,7 +53,7 @@ func SendPasswordResetPageHandler(w http.ResponseWriter, r *http.Request) {
         if prTokenDb == prToken {
             timeNow := time.Now()
             if timeNow.After(expiryTime) {
-                resBytes, err = os.ReadFile("handlers/../htmls/passwordResetTokenExpired.html")
+                resBytes, err = os.ReadFile("htmls/passwordResetTokenExpired.html")
                 if err != nil {
                     http.Error(w, err.Error(), http.StatusInternalServerError)
                     return
@@ -65,7 +65,7 @@ func SendPasswordResetPageHandler(w http.ResponseWriter, r *http.Request) {
                 }
                 return
             }else {
-                resBytes, err = os.ReadFile("handlers/../htmls/passwordReset.html")
+                resBytes, err = os.ReadFile("htmls/passwordReset.html")
                 if err != nil {
                     http.Error(w, err.Error(), http.StatusInternalServerError)
                     return
@@ -78,7 +78,7 @@ func SendPasswordResetPageHandler(w http.ResponseWriter, r *http.Request) {
                 return
             }
         }else {
-            resBytes, err = os.ReadFile("handlers/../htmls/passwordResetRequestInvalid.html")
+            resBytes, err = os.ReadFile("htmls/passwordResetRequestInvalid.html")
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return

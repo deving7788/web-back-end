@@ -38,7 +38,7 @@ func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         switch {
         case err == sql.ErrNoRows:
-            resBytes, err = os.ReadFile("handlers/../htmls/emailVrfct404.html")
+            resBytes, err = os.ReadFile("htmls/emailVrfct404.html")
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return
@@ -57,7 +57,7 @@ func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
         if vrfctTokenDb == vrfctToken {
             timeNow := time.Now()
             if timeNow.After(expiryTime) {
-                resBytes, err = os.ReadFile("handlers/../htmls/emailVrfctTokenExpired.html")
+                resBytes, err = os.ReadFile("htmls/emailVrfctTokenExpired.html")
                 if err != nil {
                     http.Error(w, err.Error(), http.StatusInternalServerError)
                     return
@@ -73,7 +73,7 @@ func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
                 if err != nil {
                     switch {
                     case nil == sql.ErrNoRows:
-                        resBytes, err = os.ReadFile("handlers/../htmls/emailVrfct404.html")
+                        resBytes, err = os.ReadFile("htmls/emailVrfct404.html")
                         if err != nil {
                             http.Error(w, err.Error(), http.StatusInternalServerError)
                             return
@@ -89,7 +89,7 @@ func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
                         return
                     }
                 }else {
-                    resBytes, err = os.ReadFile("handlers/../htmls/emailVerified.html")
+                    resBytes, err = os.ReadFile("htmls/emailVerified.html")
                     if err != nil {
                         http.Error(w, err.Error(), http.StatusInternalServerError)
                         return
@@ -103,7 +103,7 @@ func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
                 }
             }
         }else {
-            resBytes, err = os.ReadFile("handlers/../htmls/emailVrfctRequestInvalid.html")  
+            resBytes, err = os.ReadFile("htmls/emailVrfctRequestInvalid.html")  
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
                 return

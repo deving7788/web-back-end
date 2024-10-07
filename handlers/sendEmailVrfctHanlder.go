@@ -24,8 +24,8 @@ func SendEmailVrfctHandler(w http.ResponseWriter, r *http.Request) {
     var displayName, email string = "", ""
     var userId int
     var userIdFloat float64
-    apiAddress := os.Getenv("API_ADDRESS")
-    baseStr := fmt.Sprintf("http://%s/api/user/email-cfmt?", apiAddress)
+    apiAddress := os.Getenv("API_HOST")
+    baseStr := fmt.Sprintf("%s/api/user/email-cfmt?", apiAddress)
 
     //get accessToken cookie and parse access token
     accessTokenCookie := auth.GetThisCookie("accessToken", r)
