@@ -26,10 +26,8 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
     //declare user token
     var userToken custypes.UserToken
     //get accessToken cookie and parse access token
-    accessTokenCookie := auth.GetThisCookie("accessToken", r)
-    if len(accessTokenCookie) != 0 {
-        //extract access token
-        accessTokenStr := strings.Split(accessTokenCookie, "=")[1]
+    accessTokenStr := auth.GetThisCookie("accessToken", r)
+    if len(accessTokenStr) != 0 {
         //parse access token
         accessToken, err := auth.ParseToken(accessTokenStr)
         if err != nil {

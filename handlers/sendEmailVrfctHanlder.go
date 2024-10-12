@@ -28,10 +28,8 @@ func SendEmailVrfctHandler(w http.ResponseWriter, r *http.Request) {
     baseStr := fmt.Sprintf("%s/api/user/email-cfmt?", apiAddress)
 
     //get accessToken cookie and parse access token
-    accessTokenCookie := auth.GetThisCookie("accessToken", r)
-    if len(accessTokenCookie) != 0 {
-        //extract access token
-        accessTokenStr := strings.Split(accessTokenCookie, "=")[1]
+    accessTokenStr := auth.GetThisCookie("accessToken", r)
+    if len(accessTokenStr) != 0 {
         //parse access token
         accessToken, err := auth.ParseToken(accessTokenStr)
         if err != nil {

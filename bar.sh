@@ -1,4 +1,4 @@
 #!/bin/bash
 
-go build -o goserver
-./goserver
+go build -o gobeserver
+./gobeserver
