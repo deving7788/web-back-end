@@ -5,8 +5,6 @@ import (
     "encoding/json"
     "database/sql"
     "net/http"
-    "strings"
-    "web-back-end/midware"
     "web-back-end/custypes"
     "web-back-end/database"
     "web-back-end/utils"
@@ -14,13 +12,6 @@ import (
 )
 
 func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "application/json")
-
-    //handle pre-flight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
 
     //get request body of json
     bodyStream := r.Body
@@ -96,7 +87,7 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
     userToken.EmailVerified = emailVerified
 
     //set access token
-    err = midware.SetAccessCookie(w, userToken)
+    err = auth.SetAccessCookie(w, userToken)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return

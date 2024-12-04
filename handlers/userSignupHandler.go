@@ -2,26 +2,17 @@ package handlers
 
 import (
     "net/http"
-    "strings"
     "os"
     "io"
     "strconv"
     "encoding/json"
     "web-back-end/database"
     "web-back-end/custypes"
-    "web-back-end/midware"
     "web-back-end/auth"
     "web-back-end/utils"
 )
 
 func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "application/json")
-
-    //handle preflight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
 
     //declear and initialize response body
     var resBody custypes.ResponseBodySignup
@@ -123,7 +114,7 @@ func UserSignupHandler(w http.ResponseWriter, r *http.Request) {
     userToken.EmailVerified = false
 
     //set access token cookie
-    err = midware.SetAccessCookie(w, userToken)
+    err = auth.SetAccessCookie(w, userToken)
     if err != nil {
         http.Error(w, err.Error(), http.StatusNotImplemented) 
         return

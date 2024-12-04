@@ -5,9 +5,12 @@ import (
     "log"
     "os"
     "fmt"
+    "time"
     _ "github.com/lib/pq"
     "web-back-end/database"
     "web-back-end/handlers"
+    "web-back-end/midware"
+    "web-back-end/rateLimiter"
 )
 
 func main() {
@@ -25,6 +28,8 @@ func main() {
     fmt.Println("PostgreSql connection established")
 
     defer database.Blogdb.Close()
+
+    rl := rateLimiter.NewRateLimiter(100, 60*time.Second, 120*time.Second)
 
     //create and run api server
     mux := http.NewServeMux()
@@ -44,9 +49,12 @@ func main() {
     mux.HandleFunc("/api/blog/article-titles", handlers.GetArticleTitlesHandler)
     mux.HandleFunc("/api/blog/article", handlers.GetArticleHandler)
 
+    handler := midware.RateLimit(mux, rl)
+    handler = midware.HandlePreflight(handler)
+    handler = midware.SetCors(handler)
+
     goServerPort := os.Getenv("GO_SERVER_PORT")
     fmt.Println("go api server listening on: ", goServerPort)
-
-    log.Fatal(http.ListenAndServe(goServerPort, mux))
+    log.Fatal(http.ListenAndServe(goServerPort, handler))
 }
 

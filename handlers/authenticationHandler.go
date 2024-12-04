@@ -4,9 +4,7 @@ import (
     "errors"
     "io"
     "encoding/json"
-    "strings"
     "database/sql"
-    "web-back-end/midware"
     "web-back-end/auth"
     "web-back-end/custypes"
     "web-back-end/database"
@@ -14,13 +12,7 @@ import (
 )
 
 func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "application/json")
 
-    //handle preflight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
     //declare response body
     var resBody custypes.ResponseBodyUser
     //declare user token
@@ -99,7 +91,7 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
             return
         }
         //write access token into cookie header
-        err = midware.SetAccessCookie(w, userToken) 
+        err = auth.SetAccessCookie(w, userToken) 
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
@@ -205,7 +197,7 @@ func AuthenticationHandler(w http.ResponseWriter, r *http.Request ) {
     }
 
     //write access token into cookie header
-    err = midware.SetAccessCookie(w, userToken) 
+    err = auth.SetAccessCookie(w, userToken) 
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return

@@ -5,20 +5,12 @@ import (
     "time"
     "io"
     "net/http"
-    "strings"
     "strconv" 
     "database/sql"
-    "web-back-end/midware"
     "web-back-end/database"
 )
 
 func SendPasswordResetPageHandler(w http.ResponseWriter, r *http.Request) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
-    //handle pre-flight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
     //get pr token id and pr token from request url
     prToken := r.URL.Query()["token"][0]
     prTokenIdStr := r.URL.Query()["id"][0] 

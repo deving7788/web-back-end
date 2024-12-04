@@ -4,19 +4,11 @@ import (
     "fmt"
     "net/http"
     "os"
-    "strings"
-    "web-back-end/midware"
     "web-back-end/database"
     "web-back-end/utils"
 )
 
 func ForgetPasswordHandler(w http.ResponseWriter, r *http.Request) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
-    //hanlde pre-flight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
     //get email address from request url
     email := r.URL.Query()["email"][0]
     //get user id from database

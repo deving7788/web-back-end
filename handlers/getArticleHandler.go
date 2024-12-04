@@ -6,20 +6,12 @@ import (
     "errors"
     "database/sql"
     "encoding/json"
-    "strings"
     "strconv"
-    "web-back-end/midware"
     "web-back-end/custypes"
     "web-back-end/database"
 )
 
 func GetArticleHandler(w http.ResponseWriter, r *http.Request) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "application/json")
-    //handle pre-flight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
     //get article id from request url
     articleIdStr := r.URL.Query()["articleId"][0]
     articleId, err := strconv.Atoi(articleIdStr)

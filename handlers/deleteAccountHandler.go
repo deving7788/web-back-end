@@ -5,8 +5,6 @@ import (
     "errors"
     "encoding/json"
     "net/http"
-    "strings"
-    "web-back-end/midware"
     "web-back-end/database"
     "web-back-end/auth"
     "web-back-end/utils"
@@ -14,12 +12,7 @@ import (
 )
 
 func DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "application/json")
-    //handle pre-flight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
+
     //get request body of json
     bodyStream := r.Body
     bodyBytes, err := io.ReadAll(bodyStream)

@@ -8,17 +8,10 @@ import (
     "time"
     "database/sql"
     "strconv"
-    "web-back-end/midware"
     "web-back-end/database"
 )
 
 func EmailCfmtHandler(w http.ResponseWriter, r *http.Request) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "text/html")
-    //handle pre-flight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
     //get id and verification token from request url
     url := r.URL
     rawQuery := url.RawQuery

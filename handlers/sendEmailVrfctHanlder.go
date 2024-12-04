@@ -1,12 +1,10 @@
 package handlers
 
 import (
-    "strings"
     "fmt"
     "net/http"
     "errors"
     "os"
-    "web-back-end/midware"
     "web-back-end/auth"
     "web-back-end/utils"
     "web-back-end/database"
@@ -14,12 +12,6 @@ import (
 )
 
 func SendEmailVrfctHandler(w http.ResponseWriter, r *http.Request) {
-    midware.SetCors(w)
-    w.Header().Set("Content-Type", "application/json")
-    //handle pre-flight request
-    if strings.ToLower(r.Method) == "options" {
-        return
-    }
     //declare and initialze variables
     var displayName, email string = "", ""
     var userId int
