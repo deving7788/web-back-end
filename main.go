@@ -11,9 +11,15 @@ import (
     "web-back-end/handlers"
     "web-back-end/midware"
     "web-back-end/rateLimiter"
+    "web-back-end/utils"
 )
 
 func main() {
+    //generate html files
+    err := utils.GenerateHTML()
+    if err != nil {
+        log.Fatal(err)
+    }
     //create and run postgreSql database connection
     var errConnDB error 
     database.Blogdb, errConnDB = database.ConnectDB()
@@ -53,7 +59,7 @@ func main() {
     handler = midware.HandlePreflight(handler)
     handler = midware.SetCors(handler)
 
-    goServerPort := os.Getenv("GO_SERVER_PORT")
+    goServerPort := os.Getenv("API_PORT")
     fmt.Println("go api server listening on: ", goServerPort)
     log.Fatal(http.ListenAndServe(goServerPort, handler))
 }
